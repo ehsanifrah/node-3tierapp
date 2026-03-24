@@ -1,0 +1,43 @@
+services:
+
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: ./api
+    container_name: api_service
+    restart: always
+    ports:
+      - "5000:3000"
+    environment:
+      DBUSER: myuser
+      DB: mydb
+      DBPASS: mypassword
+      DBHOST: db
+      DBPORT: 5432
+    depends_on:
+      - db
+
+  web:
+    build: ./web
+    container_name: web_service
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      API_HOST: http://api:3000
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
